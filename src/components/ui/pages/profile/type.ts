@@ -1,3 +1,4 @@
+import { TUser } from '@utils-types';
 import { ChangeEvent, SyntheticEvent } from 'react';
 
 export type ProfileUIProps = {
@@ -7,8 +8,9 @@ export type ProfileUIProps = {
     password: string;
   };
   isFormChanged: boolean;
+  updateUserError?: string;
   handleSubmit: (e: SyntheticEvent) => void;
   handleCancel: (e: SyntheticEvent) => void;
   handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  updateUserError?: string;
+  handleLogout: () => void; // добавили
 };
