@@ -1,13 +1,15 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 import { RootState } from '../../services/store';
+import { getOrderByNumber } from '../../services/slices/ordersSlice';
 
 export const OrderInfo: FC = () => {
   const { number } = useParams();
+  const dispatch = useDispatch();
   const orderNumber = number ? parseInt(number) : 0;
 
   const feedOrders = useSelector((state: RootState) => state.feed.orders);
@@ -15,7 +17,9 @@ export const OrderInfo: FC = () => {
   const ingredients = useSelector(
     (state: RootState) => state.ingredients.items
   );
+  const ordersLoading = useSelector((state: RootState) => state.orders.loading);
 
+  // Ищем заказ в существующих данных
   const order = useMemo(
     () =>
       [...feedOrders, ...profileOrders].find(
@@ -24,16 +28,27 @@ export const OrderInfo: FC = () => {
     [feedOrders, profileOrders, orderNumber]
   );
 
-  const orderInfo = useMemo(() => {
-    if (!order || !ingredients.length) return null;
+  // Если заказ не найден, загружаем его по API
+  useEffect(() => {
+    if (!order && orderNumber > 0 && !ordersLoading) {
+      dispatch(getOrderByNumber(orderNumber));
+    }
+  }, [order, orderNumber, ordersLoading, dispatch]);
 
-    const date = new Date(order.createdAt);
+  const orderInfo = useMemo(() => {
+    // Используем order или ищем в profileOrders после загрузки
+    const targetOrder =
+      order || profileOrders.find((item) => item.number === orderNumber);
+
+    if (!targetOrder || !ingredients.length) return null;
+
+    const date = new Date(targetOrder.createdAt);
 
     type TIngredientsWithCount = {
       [key: string]: TIngredient & { count: number };
     };
 
-    const ingredientsInfo = order.ingredients.reduce(
+    const ingredientsInfo = targetOrder.ingredients.reduce(
       (acc: TIngredientsWithCount, item: string) => {
         if (!acc[item]) {
           const ingredient = ingredients.find(
@@ -60,14 +75,14 @@ export const OrderInfo: FC = () => {
     );
 
     return {
-      ...order,
+      ...targetOrder,
       ingredientsInfo,
       date,
       total
     };
-  }, [order, ingredients]);
+  }, [order, profileOrders, orderNumber, ingredients]);
 
-  if (!orderInfo) {
+  if (!orderInfo || ordersLoading) {
     return <Preloader />;
   }
 

@@ -1,5 +1,11 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { TOrder } from '../../utils/types';
+import { getFeedsApi } from '../../utils/burger-api';
+
+export const getFeeds = createAsyncThunk('feed/getFeeds', async () => {
+  const response = await getFeedsApi();
+  return response;
+});
 
 interface FeedState {
   orders: TOrder[];
@@ -7,7 +13,6 @@ interface FeedState {
   totalToday: number;
   loading: boolean;
   error: string | null;
-  isConnected: boolean;
 }
 
 const initialState: FeedState = {
@@ -15,43 +20,30 @@ const initialState: FeedState = {
   total: 0,
   totalToday: 0,
   loading: true,
-  error: null,
-  isConnected: false
+  error: null
 };
 
 const feedSlice = createSlice({
   name: 'feed',
   initialState,
-  reducers: {
-    wsConnect: (state, action) => {
-      state.loading = true;
-      state.error = null;
-    },
-    wsDisconnect: (state) => {
-      state.isConnected = false;
-    },
-    wsOpen: (state) => {
-      state.isConnected = true;
-      state.loading = false;
-    },
-    wsClose: (state) => {
-      state.isConnected = false;
-    },
-    wsError: (state, action) => {
-      state.error = action.payload;
-      state.loading = false;
-      state.isConnected = false;
-    },
-    wsMessage: (state, action) => {
-      state.orders = action.payload.orders;
-      state.total = action.payload.total;
-      state.totalToday = action.payload.totalToday;
-      state.loading = false;
-    }
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(getFeeds.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getFeeds.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload.orders;
+        state.total = action.payload.total;
+        state.totalToday = action.payload.totalToday;
+      })
+      .addCase(getFeeds.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Ошибка загрузки ленты';
+      });
   }
 });
-
-export const { wsConnect, wsDisconnect, wsOpen, wsClose, wsError, wsMessage } =
-  feedSlice.actions;
 
 export default feedSlice.reducer;

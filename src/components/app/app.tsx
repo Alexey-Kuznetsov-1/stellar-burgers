@@ -26,7 +26,7 @@ const App = () => {
   const navigate = useNavigate();
   const background = location.state?.background;
 
-  const { isLoading, error, items } = useSelector((state) => state.ingredients);
+  const { isLoading, error } = useSelector((state) => state.ingredients);
   const isAuthChecked = useSelector((state) => state.user.isAuthChecked);
 
   useEffect(() => {
@@ -64,6 +64,9 @@ const App = () => {
       <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
+        <Route path='/feed/:number' element={<OrderInfo />} /> {/* Добавлено */}
+        <Route path='/ingredients/:id' element={<IngredientDetails />} />{' '}
+        {/* Добавлено */}
         <Route
           path='/login'
           element={
@@ -112,6 +115,15 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />{' '}
+        {/* Добавлено */}
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 

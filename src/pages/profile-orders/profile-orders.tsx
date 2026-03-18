@@ -3,8 +3,7 @@ import { useDispatch, useSelector } from '../../services/store';
 import { ProfileOrdersUI } from '@ui-pages';
 import { Preloader } from '@ui';
 import { RootState } from '../../services/store';
-import { wsConnect, wsDisconnect } from '../../services/slices/ordersSlice';
-import { getCookie } from '../../utils/cookie';
+import { getUserOrders } from '../../services/slices/ordersSlice';
 
 export const ProfileOrders: FC = () => {
   const dispatch = useDispatch();
@@ -13,16 +12,7 @@ export const ProfileOrders: FC = () => {
   );
 
   useEffect(() => {
-    const token = getCookie('accessToken')?.replace('Bearer ', '');
-    if (token) {
-      dispatch(
-        wsConnect(`wss://norma.education-services.ru/orders?token=${token}`)
-      );
-    }
-
-    return () => {
-      dispatch(wsDisconnect());
-    };
+    dispatch(getUserOrders());
   }, [dispatch]);
 
   if (loading) {

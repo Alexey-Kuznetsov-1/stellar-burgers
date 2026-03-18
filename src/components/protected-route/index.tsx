@@ -22,13 +22,15 @@ export const ProtectedRoute = ({
     return <Preloader />;
   }
 
-  if (onlyUnAuth && user) {
-    const from = location.state?.from || { pathname: '/' };
-    return <Navigate to={from} />;
+  // Для неавторизованных пользователей на защищенных маршрутах
+  if (!onlyUnAuth && !user) {
+    return <Navigate replace to='/login' state={{ from: location }} />;
   }
 
-  if (!onlyUnAuth && !user) {
-    return <Navigate to='/login' state={{ from: location }} />;
+  // Для авторизованных пользователей на страницах логина/регистрации
+  if (onlyUnAuth && user) {
+    const from = location.state?.from || { pathname: '/' };
+    return <Navigate replace to={from} />;
   }
 
   return children;
