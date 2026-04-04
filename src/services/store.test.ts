@@ -1,4 +1,10 @@
 import store from './store';
+import ingredientsReducer from './slices/ingredientsSlice';
+import constructorReducer from './slices/constructorSlice';
+import userReducer from './slices/userSlice';
+import orderReducer from './slices/orderSlice';
+import feedReducer from './slices/feedSlice';
+import ordersReducer from './slices/ordersSlice';
 
 describe('rootReducer', () => {
   it('должен правильно инициализировать store', () => {
@@ -46,5 +52,23 @@ describe('rootReducer', () => {
       loading: true,
       error: null
     });
+  });
+
+  it('handles unknown action correctly', () => {
+    const initAction = { type: '@@INIT' };
+
+    // Проверяем, что после неизвестного экшена состояние не изменилось
+    expect(store.getState().ingredients).toEqual(
+      ingredientsReducer(undefined, initAction)
+    );
+    expect(store.getState().burgerConstructor).toEqual(
+      constructorReducer(undefined, initAction)
+    );
+    expect(store.getState().user).toEqual(userReducer(undefined, initAction));
+    expect(store.getState().order).toEqual(orderReducer(undefined, initAction));
+    expect(store.getState().feed).toEqual(feedReducer(undefined, initAction));
+    expect(store.getState().orders).toEqual(
+      ordersReducer(undefined, initAction)
+    );
   });
 });

@@ -1,7 +1,6 @@
 import ingredientsSlice, { fetchIngredients } from './ingredientsSlice';
 import { TIngredient } from '../../utils/types';
 
-// Моковые данные
 const mockIngredients: TIngredient[] = [
   {
     _id: 'bun-1',
